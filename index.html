@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lily's Mouse Adventure 🐭</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink: #FF6B9D;
+            --purple: #C084FC;
+            --blue: #60A5FA;
+            --green: #4ADE80;
+            --yellow: #FBBF24;
+            --orange: #FB923C;
+            --red: #F87171;
+            --sky: #E0F2FE;
+            --dark: #1E293B;
+            --text: #334155;
+            --gentle-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --pop-shadow: 0 6px 30px rgba(0,0,0,0.12);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(180deg, #DBEAFE 0%, #FDF2F8 40%, #ECFDF5 70%, #FEF9C3 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text);
+        }
+
+        /* ===== FLOATING CLOUDS ===== */
+        .bg-decor { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .cloud { position: absolute; font-size: 3rem; opacity: 0.25; animation: floatCloud linear infinite; }
+        .cloud:nth-child(1) { top: 5%; left: -10%; animation-duration: 45s; font-size: 4rem; }
+        .cloud:nth-child(2) { top: 20%; left: -10%; animation-duration: 60s; animation-delay: -20s; }
+        .cloud:nth-child(3) { top: 40%; left: -10%; animation-duration: 50s; animation-delay: -10s; font-size: 3.5rem; }
+        .cloud:nth-child(4) { top: 60%; left: -10%; animation-duration: 70s; animation-delay: -35s; }
+        .cloud:nth-child(5) { top: 80%; left: -10%; animation-duration: 55s; animation-delay: -5s; font-size: 2.5rem; }
+        @keyframes floatCloud { from { transform: translateX(-100px); } to { transform: translateX(calc(100vw + 100px)); } }
+
+        /* ===== CONFETTI CANVAS ===== */
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+        /* ===== APP CONTAINER ===== */
+        .app {
+            position: relative; z-index: 1;
+            max-width: 820px; margin: 0 auto; padding: 20px 16px 40px;
+        }
+
+        /* ===== HEADER ===== */
+        .header { text-align: center; margin-bottom: 14px; }
+        .header h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.4rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--pink), var(--purple), var(--blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
+        }
+        .mascot {
+            font-size: 2.6rem; display: inline-block;
+            animation: mascotBounce 2s ease-in-out infinite;
+        }
+        @keyframes mascotBounce {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-8px) rotate(5deg); }
+        }
+
+        /* ===== STATS ROW ===== */
+        .stats-row {
+            display: flex; justify-content: center; gap: 10px;
+            margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .stat-pill {
+            background: white; border-radius: 50px; padding: 8px 18px;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: var(--gentle-shadow); font-weight: 600; font-size: 1rem;
+        }
+        .stat-pill .icon { font-size: 1.15rem; }
+        .stat-pill.stars .val { color: var(--yellow); }
+        .stat-pill.level .val { color: var(--purple); }
+        .stat-pill.streak .val { color: var(--orange); }
+
+        /* ===== SKILL SELECTOR ===== */
+        .skill-selector {
+            display: flex; gap: 8px; justify-content: center;
+            margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .skill-btn {
+            background: white; border: 3px solid #E2E8F0;
+            border-radius: 16px; padding: 10px 14px; cursor: pointer;
+            text-align: center; transition: all 0.25s; font-family: 'Fredoka', sans-serif;
+            font-size: 0.85rem; font-weight: 600; color: var(--text);
+            min-width: 85px; position: relative;
+        }
+        .skill-btn .skill-icon { font-size: 1.4rem; display: block; margin-bottom: 2px; }
+        .skill-btn:hover { border-color: var(--purple); background: #FAF5FF; transform: translateY(-2px); }
+        .skill-btn.active {
+            border-color: var(--pink); background: linear-gradient(135deg, #FFF1F2, #FDF2F8);
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.25); transform: translateY(-2px);
+        }
+
+        /* ===== INSTRUCTIONS BUBBLE ===== */
+        .instructions-bubble {
+            background: white; border-radius: 20px; padding: 14px 22px;
+            margin-bottom: 12px; text-align: center;
+            box-shadow: var(--gentle-shadow); font-size: 1.1rem;
+            font-weight: 500; line-height: 1.5;
+            border-left: 5px solid var(--pink);
+        }
+        .instructions-bubble strong { color: var(--pink); }
+
+        /* ===== FEEDBACK BAR ===== */
+        .feedback-bar {
+            text-align: center; padding: 10px; margin-bottom: 10px;
+            border-radius: 14px; font-size: 1.2rem; font-weight: 700;
+            background: #F8FAFC; color: #94A3B8; transition: all 0.3s;
+            min-height: 46px; display: flex; align-items: center; justify-content: center;
+        }
+        .feedback-bar.success { background: #F0FDF4; color: #16A34A; }
+        .feedback-bar.error { background: #FEF2F2; color: #DC2626; }
+
+        /* ===== PRACTICE AREA ===== */
+        .practice-area {
+            background: white; border: 3px solid #E2E8F0;
+            border-radius: 24px; height: 400px; position: relative;
+            overflow: hidden; box-shadow: var(--pop-shadow);
+            cursor: crosshair;
+        }
+        .practice-area.drag-mode { cursor: default; }
+
+        /* ===== CLICK TARGETS ===== */
+        .animal-target {
+            position: absolute; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.15s;
+            background: linear-gradient(135deg, #FFF1F2, #FDF2F8);
+            border: 3px solid var(--pink);
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+        }
+        .animal-target:hover { transform: scale(1.1); }
+        .animal-target.pop { animation: targetPop 0.35s ease-out forwards; }
+        @keyframes targetPop {
+            0% { transform: scale(1); opacity: 1; }
+            40% { transform: scale(1.4); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        .animal-target.shake { animation: targetShake 0.4s ease-out; }
+        @keyframes targetShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+        .animal-target.appear { animation: targetAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes targetAppear { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        .animal-target.blue { border-color: var(--blue); background: linear-gradient(135deg, #EFF6FF, #DBEAFE); box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3); }
+        .animal-target.orange { border-color: var(--orange); background: linear-gradient(135deg, #FFF7ED, #FFEDD5); box-shadow: 0 4px 15px rgba(251, 146, 60, 0.3); }
+        .animal-target.green { border-color: var(--green); background: linear-gradient(135deg, #F0FDF4, #DCFCE7); box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3); }
+        .animal-target.purple { border-color: var(--purple); background: linear-gradient(135deg, #FAF5FF, #F3E8FF); box-shadow: 0 4px 15px rgba(192, 132, 252, 0.3); }
+
+        /* ===== HOVER TARGET ===== */
+        .hover-bar-track {
+            position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            width: 70%; height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden;
+        }
+        .hover-bar-fill {
+            height: 100%; width: 0%; border-radius: 4px;
+            background: linear-gradient(90deg, var(--green), #16A34A);
+            transition: width 0.08s linear;
+        }
+
+        /* ===== DRAG & DROP ===== */
+        .drag-animal {
+            position: absolute; width: 80px; height: 80px;
+            border-radius: 18px; display: flex; align-items: center; justify-content: center;
+            font-size: 2.4rem; cursor: grab; z-index: 10;
+            background: linear-gradient(135deg, #FAF5FF, #F3E8FF);
+            border: 3px solid var(--purple);
+            box-shadow: 0 4px 15px rgba(192, 132, 252, 0.35);
+            transition: box-shadow 0.2s;
+        }
+        .drag-animal:active, .drag-animal.dragging { cursor: grabbing; box-shadow: 0 8px 30px rgba(192, 132, 252, 0.5); }
+        .drop-home {
+            position: absolute; width: 100px; height: 100px;
+            border: 4px dashed var(--purple); border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; font-weight: 600; color: var(--purple);
+            background: rgba(192, 132, 252, 0.08); transition: all 0.3s;
+        }
+        .drop-home.hover { background: rgba(192, 132, 252, 0.2); border-style: solid; transform: scale(1.05); }
+        .drop-home.success { background: #F0FDF4; border-color: var(--green); border-style: solid; }
+
+        /* ===== SCROLL AREA ===== */
+        .scroll-box {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            width: 320px; height: 370px; background: white;
+            border: 3px solid #E2E8F0; border-radius: 16px;
+            overflow-y: auto; padding: 16px;
+        }
+        .scroll-box::-webkit-scrollbar { width: 10px; }
+        .scroll-box::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 5px; }
+        .scroll-box::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 5px; }
+        .scroll-filler {
+            height: 140px; display: flex; align-items: center; justify-content: center;
+            color: #CBD5E1; font-size: 1.2rem; font-weight: 600;
+            border-bottom: 2px dashed #E2E8F0;
+        }
+        .scroll-gem {
+            background: linear-gradient(135deg, var(--green), #16A34A);
+            color: white; padding: 18px; border-radius: 16px;
+            text-align: center; font-weight: 700; font-size: 1.15rem;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+            transition: transform 0.2s;
+        }
+        .scroll-gem:hover { transform: scale(1.05); }
+
+        /* ===== TEXT SELECT ===== */
+        .select-container {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; border: 3px solid #E2E8F0; border-radius: 20px;
+            padding: 28px; width: 85%; max-width: 480px; text-align: center;
+        }
+        .select-container h3 { color: var(--purple); margin-bottom: 14px; font-size: 1.15rem; }
+        .selectable-text {
+            font-size: 1.35rem; line-height: 2; color: var(--text); padding: 16px;
+            background: #F8FAFC; border-radius: 12px; cursor: text;
+            user-select: text; -webkit-user-select: text; -moz-user-select: text;
+        }
+        .selectable-text .target-word {
+            background: #FFF7ED; padding: 3px 6px; border-radius: 6px;
+            border: 2px dashed var(--orange);
+            user-select: text; -webkit-user-select: text;
+        }
+        .selectable-text .target-word.found {
+            background: #F0FDF4; border-color: var(--green); border-style: solid;
+        }
+        .select-hint { margin-top: 14px; color: #94A3B8; font-size: 0.95rem; }
+
+        /* ===== OVERLAYS ===== */
+        .overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 24px; z-index: 100; text-align: center; padding: 24px;
+        }
+        .overlay.hidden { display: none; }
+        .start-overlay { background: rgba(255,255,255,0.97); }
+        .start-overlay h2 {
+            font-family: 'Baloo 2', cursive; font-size: 1.8rem; color: var(--pink); margin-bottom: 8px;
+        }
+        .start-overlay p { color: #64748B; margin-bottom: 20px; max-width: 380px; line-height: 1.6; font-size: 1.05rem; }
+        .start-overlay .start-emoji { font-size: 3.5rem; margin-bottom: 10px; }
+        .pause-overlay { background: rgba(30, 41, 59, 0.75); }
+        .pause-overlay h2 { color: white; font-size: 2rem; margin-bottom: 16px; }
+
+        /* ===== CELEBRATION OVERLAY ===== */
+        .celebration-overlay {
+            background: rgba(255,255,255,0.97); flex-direction: column; gap: 10px;
+        }
+        .celebration-overlay .trophy { font-size: 3.5rem; }
+        .celebration-overlay h2 {
+            font-family: 'Baloo 2', cursive; font-size: 1.6rem; color: var(--pink);
+        }
+        .celebration-overlay .final-stats {
+            background: linear-gradient(135deg, #FDF2F8, #FAF5FF);
+            border-radius: 16px; padding: 16px 28px; margin: 8px 0;
+        }
+        .celebration-overlay .stat-row {
+            display: flex; justify-content: space-between; gap: 24px;
+            margin: 6px 0; font-size: 1rem;
+        }
+        .stat-row .label { color: #64748B; }
+        .stat-row .value { color: var(--pink); font-weight: 700; }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            font-family: 'Fredoka', sans-serif; font-weight: 700;
+            border: none; border-radius: 50px; cursor: pointer;
+            transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-big {
+            padding: 16px 40px; font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: white; box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+        }
+        .btn-big:hover { transform: translateY(-3px); box-shadow: 0 6px 25px rgba(255, 107, 157, 0.5); }
+        .btn-small {
+            padding: 10px 22px; font-size: 1rem;
+            background: white; color: var(--text); border: 2px solid #E2E8F0;
+            box-shadow: var(--gentle-shadow);
+        }
+        .btn-small:hover { border-color: var(--purple); background: #FAF5FF; }
+        .btn-sticker {
+            padding: 12px 28px; font-size: 1.05rem;
+            background: linear-gradient(135deg, #FDF2F8, #FFF1F2);
+            color: var(--pink); border: 3px solid var(--pink);
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2);
+        }
+        .btn-sticker:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 107, 157, 0.35); background: #FFF1F2; }
+
+        /* ===== CONTROLS ===== */
+        .controls { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-section {
+            margin-top: 14px; background: white; border-radius: 16px;
+            padding: 14px 20px; box-shadow: var(--gentle-shadow);
+        }
+        .progress-label {
+            display: flex; justify-content: space-between; margin-bottom: 8px;
+            font-size: 0.9rem; font-weight: 600; color: #64748B;
+        }
+        .progress-track { height: 14px; background: #F1F5F9; border-radius: 7px; overflow: hidden; }
+        .progress-fill {
+            height: 100%; border-radius: 7px;
+            background: linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-size: 200% 100%; animation: shimmer 2s linear infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ===== STICKER BOOK BUTTON ROW ===== */
+        .sticker-btn-row { text-align: center; margin-top: 14px; }
+
+        /* ===== STICKER BOOK OVERLAY ===== */
+        .sticker-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(30, 41, 59, 0.6); z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .sticker-overlay.show { opacity: 1; pointer-events: auto; }
+        .sticker-book {
+            background: white; border-radius: 28px; padding: 36px 40px;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 480px; width: 90%;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .sticker-book .big-emoji { font-size: 4rem; display: block; margin-bottom: 8px; }
+        .sticker-book h2 {
+            font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800;
+            color: var(--pink); margin-bottom: 4px;
+        }
+        .sticker-book .sticker-count { color: #64748B; font-size: 0.95rem; margin-bottom: 20px; }
+        .sticker-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr);
+            gap: 10px; margin-bottom: 20px;
+        }
+        .sticker-cell {
+            aspect-ratio: 1; border-radius: 14px; display: flex;
+            align-items: center; justify-content: center; font-size: 2rem;
+            transition: all 0.3s; position: relative;
+        }
+        .sticker-cell.unlocked {
+            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+            border: 2px solid var(--green);
+            animation: stickerIdle 3s ease-in-out infinite;
+        }
+        .sticker-cell.unlocked:hover { transform: scale(1.15); }
+        @keyframes stickerIdle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .sticker-cell.locked {
+            background: #F1F5F9; border: 2px dashed #D1D5DB;
+            font-size: 1.3rem; color: #CBD5E1;
+        }
+        .sticker-cell .sticker-name {
+            position: absolute; bottom: 2px; right: 6px;
+            font-size: 0.5rem; color: #94A3B8; font-weight: 600;
+        }
+        .btn-primary {
+            padding: 14px 32px; font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: white; box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+
+        /* ===== ANIMAL COLLECTION (mini in-page) ===== */
+        .collection {
+            margin-top: 14px; background: white; border-radius: 16px;
+            padding: 14px 18px; box-shadow: var(--gentle-shadow);
+        }
+        .collection-title { font-weight: 700; color: var(--pink); margin-bottom: 8px; font-size: 1rem; }
+        .animal-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .animal-slot {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; background: #F8FAFC; border: 2px dashed #E2E8F0;
+            transition: all 0.3s;
+        }
+        .animal-slot.unlocked { border: 2px solid var(--green); background: #F0FDF4; }
+        .animal-slot.locked { filter: grayscale(1); opacity: 0.3; }
+        .animal-slot.just-unlocked { animation: animalPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes animalPop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.8rem; }
+            .practice-area { height: 340px; }
+            .skill-btn { min-width: 70px; padding: 8px 10px; font-size: 0.78rem; }
+            .skill-btn .skill-icon { font-size: 1.2rem; }
+            .stat-pill { padding: 6px 12px; font-size: 0.85rem; }
+            .sticker-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decor">
+        <div class="cloud">☁️</div><div class="cloud">☁️</div><div class="cloud">☁️</div>
+        <div class="cloud">☁️</div><div class="cloud">☁️</div>
+    </div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="app">
+        <div class="header">
+            <span class="mascot" id="mascot">🐭</span>
+            <h1 id="titleClick">Lily's Mouse Adventure</h1>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-pill stars"><span class="icon">⭐</span><span class="val" id="totalStars">0</span></div>
+            <div class="stat-pill level"><span class="icon">🏔️</span><span class="val" id="levelName">Level 1</span></div>
+            <div class="stat-pill streak"><span class="icon">🔥</span><span class="val" id="streakCount">0</span></div>
+        </div>
+
+        <div class="skill-selector" id="skillSelector">
+            <button class="skill-btn active" data-skill="click"><span class="skill-icon">👆</span>Click</button>
+            <button class="skill-btn" data-skill="double-click"><span class="skill-icon">✌️</span>Double</button>
+            <button class="skill-btn" data-skill="right-click"><span class="skill-icon">🖱️</span>Right</button>
+            <button class="skill-btn" data-skill="hover"><span class="skill-icon">🦋</span>Hover</button>
+            <button class="skill-btn" data-skill="drag"><span class="skill-icon">🏠</span>Drag</button>
+            <button class="skill-btn" data-skill="scroll"><span class="skill-icon">📜</span>Scroll</button>
+            <button class="skill-btn" data-skill="select"><span class="skill-icon">✏️</span>Select</button>
+        </div>
+
+        <div class="instructions-bubble" id="instructions">
+            <strong>Click the animals!</strong> Tap each animal friend as they appear. Be quick!
+        </div>
+
+        <div class="feedback-bar" id="feedbackBar">Ready to play! 🎮</div>
+
+        <div class="practice-area" id="practiceArea">
+            <div class="overlay start-overlay" id="startOverlay">
+                <div class="start-emoji">🐭✨</div>
+                <h2>Ready to Play?</h2>
+                <p>Practice your mouse skills with animal friends! Click, drag, hover, and more!</p>
+                <button class="btn btn-big" id="startBtn">▶️ Let's Go!</button>
+            </div>
+            <div class="overlay pause-overlay hidden" id="pauseOverlay">
+                <h2>⏸️ Paused</h2>
+                <button class="btn btn-big" id="resumeBtn">▶️ Keep Playing!</button>
+            </div>
+            <div class="overlay celebration-overlay hidden" id="celebrationOverlay">
+                <div class="trophy">🏆</div>
+                <h2>Amazing Job!</h2>
+                <p id="celebrationMsg">You completed your practice!</p>
+                <div class="final-stats">
+                    <div class="stat-row"><span class="label">Stars Earned</span><span class="value" id="finalStars">0</span></div>
+                    <div class="stat-row"><span class="label">Best Streak</span><span class="value" id="finalStreak">0</span></div>
+                    <div class="stat-row"><span class="label">Accuracy</span><span class="value" id="finalAccuracy">100%</span></div>
+                </div>
+                <button class="btn btn-big" id="restartBtn">🔄 Play Again!</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-small" id="pauseBtn" disabled>⏸️ Pause</button>
+            <button class="btn btn-small" id="resetBtn">🔄 Reset</button>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-label">
+                <span>Session Progress</span>
+                <span><span id="progressCount">0</span> / <span id="progressGoal">15</span> exercises</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <!-- STICKER BOOK BUTTON -->
+        <div class="sticker-btn-row">
+            <button class="btn btn-sticker" id="openStickers">🎀 My Sticker Book</button>
+        </div>
+
+        <!-- MINI COLLECTION -->
+        <div class="collection">
+            <div class="collection-title">🌟 Animal Friends Collection</div>
+            <div class="animal-grid" id="animalGrid"></div>
+        </div>
+    </div>
+
+    <!-- STICKER BOOK OVERLAY -->
+    <div class="sticker-overlay" id="stickerOverlay">
+        <div class="sticker-book">
+            <span class="big-emoji">🎀</span>
+            <h2>My Sticker Book</h2>
+            <p class="sticker-count" id="stickerCount">0 of 24 friends found!</p>
+            <div class="sticker-grid" id="stickerGrid"></div>
+            <button class="btn btn-primary" id="closeStickers">Back to Playing ✨</button>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // ANIMALS & THEMING
+    // ============================================
+    const TARGET_ANIMALS = ["🐱","🐶","🐰","🐸","🦊","🐻","🐼","🐨","🦁","🐯","🐧","🦉","🐢","🐬","🐙","🐝","🦋","🐞","🐳","🦄"];
+    const COLLECTION_ANIMALS = ["🐱","🐶","🐰","🦊","🐻","🐼","🐨","🦁","🐯","🐸","🐧","🦉","🦋","🐢","🐬","🦄","🐘","🦒","🐙","🐝","🦩","🐳","🦜","🐲"];
+    const ANIMAL_NAMES = ["Cat","Dog","Bunny","Fox","Bear","Panda","Koala","Lion","Tiger","Frog","Penguin","Owl","Butterfly","Turtle","Dolphin","Unicorn","Elephant","Giraffe","Octopus","Bee","Flamingo","Whale","Parrot","Dragon"];
+    const MASCOTS = ["🐭","🐹","🐰","🐱","🦊"];
+    const CELEBRATIONS = ["Amazing!","Wonderful!","Fantastic!","Super!","You rock!","Woo hoo!","Great job!","Way to go!","Incredible!","Brilliant!"];
+    const DRAG_PAIRS = [
+        {animal:"🐱", home:"Cat's Bed 🛏️"}, {animal:"🐶", home:"Dog House 🏠"},
+        {animal:"🐸", home:"Lily Pad 🌿"}, {animal:"🐧", home:"Iceberg 🧊"},
+        {animal:"🦊", home:"Fox Den 🕳️"}, {animal:"🐻", home:"Bear Cave 🏔️"},
+        {animal:"🐰", home:"Rabbit Hole 🕳️"}, {animal:"🦉", home:"Owl Tree 🌳"},
+        {animal:"🐢", home:"Pond 💧"}, {animal:"🐝", home:"Beehive 🍯"}
+    ];
+    const COLOR_CLASSES = ["","blue","orange","green","purple"];
+
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    // ============================================
+    // TEXT SELECT: SENTENCES WITH VARIED WORD POSITIONS
+    // Each entry: { word, sentence } — the word appears at START, MIDDLE, or END
+    // ============================================
+    const SELECT_BANK = [
+        // === BUTTERFLY ===
+        { word: "butterfly", sentence: "Butterfly wings shimmer in the morning light." },
+        { word: "butterfly", sentence: "The garden had a beautiful butterfly near the roses." },
+        { word: "butterfly", sentence: "She drew a picture of a purple butterfly." },
+        // === RAINBOW ===
+        { word: "rainbow", sentence: "Rainbow colors filled the sky after the rain." },
+        { word: "rainbow", sentence: "We saw a big rainbow over the hill." },
+        { word: "rainbow", sentence: "Her painting showed a beautiful rainbow." },
+        // === SUNSHINE ===
+        { word: "sunshine", sentence: "Sunshine warmed the flowers in the garden." },
+        { word: "sunshine", sentence: "The bright sunshine made everyone smile." },
+        { word: "sunshine", sentence: "The puppies played in the warm sunshine." },
+        // === KITTEN ===
+        { word: "kitten", sentence: "Kitten paws are soft and tiny." },
+        { word: "kitten", sentence: "A fluffy little kitten hid under the chair." },
+        { word: "kitten", sentence: "Mom brought home a small gray kitten." },
+        // === PENGUIN ===
+        { word: "penguin", sentence: "Penguin babies ride on their parents' feet." },
+        { word: "penguin", sentence: "The silly penguin slid across the ice." },
+        { word: "penguin", sentence: "My favorite stuffed animal is a penguin." },
+        // === UNICORN ===
+        { word: "unicorn", sentence: "Unicorn stories are full of magic." },
+        { word: "unicorn", sentence: "She imagined a sparkly unicorn in the clouds." },
+        { word: "unicorn", sentence: "The sticker on her notebook was a unicorn." },
+        // === DOLPHIN ===
+        { word: "dolphin", sentence: "Dolphin jumps make big splashes in the ocean." },
+        { word: "dolphin", sentence: "We watched a friendly dolphin swim beside the boat." },
+        { word: "dolphin", sentence: "Her favorite sea creature is a dolphin." },
+        // === TURTLE ===
+        { word: "turtle", sentence: "Turtle shells protect them from danger." },
+        { word: "turtle", sentence: "The little green turtle crawled toward the water." },
+        { word: "turtle", sentence: "We found a tiny baby turtle." },
+        // === ELEPHANT ===
+        { word: "elephant", sentence: "Elephant ears are used to stay cool." },
+        { word: "elephant", sentence: "The baby elephant sprayed water with its trunk." },
+        { word: "elephant", sentence: "The biggest animal at the zoo was the elephant." },
+        // === GIRAFFE ===
+        { word: "giraffe", sentence: "Giraffe necks can be taller than a house." },
+        { word: "giraffe", sentence: "A tall spotted giraffe ate from the treetop." },
+        { word: "giraffe", sentence: "My drawing shows a happy giraffe." },
+        // === LADYBUG ===
+        { word: "ladybug", sentence: "Ladybug spots come in many numbers." },
+        { word: "ladybug", sentence: "A tiny red ladybug landed on her finger." },
+        { word: "ladybug", sentence: "She counted the dots on the ladybug." },
+        // === FLOWER ===
+        { word: "flower", sentence: "Flower petals fell gently to the ground." },
+        { word: "flower", sentence: "She picked a pretty flower for her mom." },
+        { word: "flower", sentence: "The bees buzzed around every flower." },
+        // === SPARKLE ===
+        { word: "sparkle", sentence: "Sparkle dust covered the fairy's wings." },
+        { word: "sparkle", sentence: "The stars sparkle brightly at night." },
+        { word: "sparkle", sentence: "Her new shoes had a lot of sparkle." },
+        // === COOKIE ===
+        { word: "cookie", sentence: "Cookie crumbs fell on the kitchen floor." },
+        { word: "cookie", sentence: "Dad baked a giant chocolate chip cookie." },
+        { word: "cookie", sentence: "She shared her last cookie." },
+        // === PUPPY ===
+        { word: "puppy", sentence: "Puppy tails wag when they are happy." },
+        { word: "puppy", sentence: "The little brown puppy licked her face." },
+        { word: "puppy", sentence: "We played all day with the new puppy." },
+        // === BUNNY ===
+        { word: "bunny", sentence: "Bunny ears wiggle when they hear sounds." },
+        { word: "bunny", sentence: "A soft white bunny hopped through the garden." },
+        { word: "bunny", sentence: "She gave a carrot to the bunny." },
+        // === PANDA ===
+        { word: "panda", sentence: "Panda bears love to eat bamboo." },
+        { word: "panda", sentence: "The baby panda rolled down the hill." },
+        { word: "panda", sentence: "Her favorite animal at the zoo was the panda." },
+        // === GARDEN ===
+        { word: "garden", sentence: "Garden plants grow taller every day." },
+        { word: "garden", sentence: "They planted tomatoes in the garden." },
+        { word: "garden", sentence: "The butterflies loved our garden." },
+        // === OCEAN ===
+        { word: "ocean", sentence: "Ocean waves crash on the sandy beach." },
+        { word: "ocean", sentence: "They saw whales swimming in the ocean." },
+        { word: "ocean", sentence: "Fish of every color live in the ocean." },
+        // === FOREST ===
+        { word: "forest", sentence: "Forest animals hide among the tall trees." },
+        { word: "forest", sentence: "They went on an adventure through the forest." },
+        { word: "forest", sentence: "Owls come out at night in the forest." },
+    ];
+
+    // ============================================
+    // INSTRUCTIONS PER SKILL
+    // ============================================
+    const INSTRUCTIONS = {
+        click: "<strong>Click the animals!</strong> Tap each animal friend as they pop up. Be quick!",
+        "double-click": "<strong>Double-click!</strong> Tap each animal <em>two times fast</em> to catch them!",
+        "right-click": "<strong>Right-click!</strong> Use your <em>other</em> mouse button (the right one) on each animal.",
+        hover: "<strong>Hover & hold!</strong> Move your mouse over the butterfly and <em>stay still</em> until the bar fills up. Don't click!",
+        drag: "<strong>Drag & drop!</strong> Pick up the animal and carry it to its home!",
+        scroll: "<strong>Scroll down!</strong> Use your mouse wheel to find the hidden gem, then click it!",
+        select: "<strong>Select the word!</strong> Click at the start of the highlighted word, hold, drag to the end, and let go!"
+    };
+
+    // ============================================
+    // STATE
+    // ============================================
+    const SAVE_KEY = "lilys-mouse-adventure-v2";
+    const SESSION_GOAL = 15;
+
+    let state = {
+        totalStars: 0,
+        unlockedAnimals: [0],
+        starsToNextAnimal: 8,
+        starsSinceLastAnimal: 0,
+
+        currentSkill: "click",
+        streak: 0,
+        bestStreak: 0,
+        attempts: 0,
+        successes: 0,
+        completed: 0,
+        sessionStars: 0,
+        isStarted: false,
+        isPaused: false,
+
+        activeTargets: [],
+        targetTimeout: null,
+        isDragging: false,
+        dragElement: null,
+        dragOffsetX: 0,
+        dragOffsetY: 0,
+        hoverInterval: null,
+        selectionHandler: null,
+        recentSelectIndices: []
+    };
+
+    function saveState() {
+        try {
+            localStorage.setItem(SAVE_KEY, JSON.stringify({
+                totalStars: state.totalStars,
+                unlockedAnimals: state.unlockedAnimals,
+                starsToNextAnimal: state.starsToNextAnimal,
+                starsSinceLastAnimal: state.starsSinceLastAnimal
+            }));
+        } catch(e) {}
+    }
+    function loadState() {
+        try {
+            const s = localStorage.getItem(SAVE_KEY);
+            if (s) { const p = JSON.parse(s); Object.assign(state, p); }
+        } catch(e) {}
+    }
+
+    // ============================================
+    // DOM REFS
+    // ============================================
+    const els = {
+        practiceArea: document.getElementById("practiceArea"),
+        instructions: document.getElementById("instructions"),
+        feedbackBar: document.getElementById("feedbackBar"),
+        totalStars: document.getElementById("totalStars"),
+        levelName: document.getElementById("levelName"),
+        streakCount: document.getElementById("streakCount"),
+        mascot: document.getElementById("mascot"),
+        startOverlay: document.getElementById("startOverlay"),
+        pauseOverlay: document.getElementById("pauseOverlay"),
+        celebrationOverlay: document.getElementById("celebrationOverlay"),
+        startBtn: document.getElementById("startBtn"),
+        resumeBtn: document.getElementById("resumeBtn"),
+        restartBtn: document.getElementById("restartBtn"),
+        pauseBtn: document.getElementById("pauseBtn"),
+        resetBtn: document.getElementById("resetBtn"),
+        progressCount: document.getElementById("progressCount"),
+        progressGoal: document.getElementById("progressGoal"),
+        progressFill: document.getElementById("progressFill"),
+        celebrationMsg: document.getElementById("celebrationMsg"),
+        finalStars: document.getElementById("finalStars"),
+        finalStreak: document.getElementById("finalStreak"),
+        finalAccuracy: document.getElementById("finalAccuracy"),
+        animalGrid: document.getElementById("animalGrid"),
+        skillSelector: document.getElementById("skillSelector"),
+        stickerOverlay: document.getElementById("stickerOverlay"),
+        stickerGrid: document.getElementById("stickerGrid"),
+        stickerCount: document.getElementById("stickerCount"),
+        openStickers: document.getElementById("openStickers"),
+        closeStickers: document.getElementById("closeStickers")
+    };
+
+    // ============================================
+    // CONFETTI
+    // ============================================
+    const confettiCanvas = document.getElementById("confetti-canvas");
+    const ctx = confettiCanvas.getContext("2d");
+    let confettiPieces = [];
+    let confettiAnimating = false;
+
+    function resizeCanvas() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function launchConfetti(count = 80) {
+        const colors = ["#FF6B9D","#C084FC","#60A5FA","#4ADE80","#FBBF24","#FB923C"];
+        for (let i = 0; i < count; i++) {
+            confettiPieces.push({
+                x: Math.random() * confettiCanvas.width,
+                y: -20 - Math.random() * 200,
+                w: 6 + Math.random() * 6, h: 10 + Math.random() * 10,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                vy: 2 + Math.random() * 3, vx: (Math.random() - 0.5) * 3,
+                rot: Math.random() * 360, vr: (Math.random() - 0.5) * 8
+            });
+        }
+        if (!confettiAnimating) { confettiAnimating = true; animateConfetti(); }
+    }
+    function animateConfetti() {
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        confettiPieces.forEach(p => {
+            p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.04;
+            ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+        });
+        confettiPieces = confettiPieces.filter(p => p.y < confettiCanvas.height + 30);
+        if (confettiPieces.length > 0) requestAnimationFrame(animateConfetti);
+        else { confettiAnimating = false; ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
+    }
+
+    // ============================================
+    // RENDER HELPERS
+    // ============================================
+    function updateUI() {
+        els.totalStars.textContent = state.totalStars;
+        els.streakCount.textContent = state.streak;
+        const lvl = state.totalStars < 10 ? 1 : state.totalStars < 25 ? 2 : state.totalStars < 50 ? 3 : state.totalStars < 100 ? 4 : 5;
+        const lvlNames = {1:"Mouse Beginner",2:"Click Explorer",3:"Drag Master",4:"Mouse Wizard",5:"Mouse Champion"};
+        els.levelName.textContent = lvlNames[lvl];
+        els.progressCount.textContent = state.completed;
+        els.progressGoal.textContent = SESSION_GOAL;
+        els.progressFill.style.width = Math.min((state.completed / SESSION_GOAL) * 100, 100) + "%";
+        renderMiniCollection();
+    }
+
+    function renderMiniCollection() {
+        els.animalGrid.innerHTML = "";
+        COLLECTION_ANIMALS.forEach((a, i) => {
+            const slot = document.createElement("div");
+            slot.className = "animal-slot " + (state.unlockedAnimals.includes(i) ? "unlocked" : "locked");
+            slot.textContent = a;
+            els.animalGrid.appendChild(slot);
+        });
+    }
+
+    function showFeedback(msg, type, duration = 1500) {
+        els.feedbackBar.textContent = msg;
+        els.feedbackBar.className = "feedback-bar " + type;
+        if (type !== "") {
+            setTimeout(() => {
+                els.feedbackBar.className = "feedback-bar";
+                els.feedbackBar.textContent = "Keep going! 🎮";
+            }, duration);
+        }
+    }
+
+    function changeMascot() { els.mascot.textContent = pick(MASCOTS); }
+
+    // ============================================
+    // STICKER BOOK
+    // ============================================
+    function openStickerBook() {
+        els.stickerGrid.innerHTML = "";
+        COLLECTION_ANIMALS.forEach((animal, i) => {
+            const cell = document.createElement("div");
+            cell.className = "sticker-cell";
+            if (state.unlockedAnimals.includes(i)) {
+                cell.classList.add("unlocked");
+                cell.innerHTML = animal + '<span class="sticker-name">' + ANIMAL_NAMES[i] + '</span>';
+            } else {
+                cell.classList.add("locked");
+                cell.textContent = "❓";
+            }
+            els.stickerGrid.appendChild(cell);
+        });
+        els.stickerCount.textContent = state.unlockedAnimals.length + " of " + COLLECTION_ANIMALS.length + " friends found!";
+        els.stickerOverlay.classList.add("show");
+    }
+
+    function closeStickerBook() {
+        els.stickerOverlay.classList.remove("show");
+    }
+
+    els.openStickers.addEventListener("click", openStickerBook);
+    els.closeStickers.addEventListener("click", closeStickerBook);
+
+    // ============================================
+    // PARENT RESET (click title 5 times quickly)
+    // ============================================
+    let resetClicks = 0, resetTimer = null;
+    document.getElementById("titleClick").addEventListener("click", () => {
+        resetClicks++;
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => { resetClicks = 0; }, 2000);
+        if (resetClicks >= 5) {
+            resetClicks = 0;
+            if (confirm("Parent reset: This will erase all of Lily's progress (stars, animals). Are you sure?")) {
+                localStorage.removeItem(SAVE_KEY);
+                state.totalStars = 0;
+                state.unlockedAnimals = [0];
+                state.starsToNextAnimal = 8;
+                state.starsSinceLastAnimal = 0;
+                resetSession();
+                saveState();
+            }
+        }
+    });
+
+    // ============================================
+    // CORE GAME LOGIC
+    // ============================================
+    function handleSuccess() {
+        state.successes++;
+        state.completed++;
+        state.streak++;
+        state.sessionStars++;
+        state.totalStars++;
+        state.starsSinceLastAnimal++;
+
+        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
+        if (state.starsSinceLastAnimal >= state.starsToNextAnimal) {
+            const nextAnimal = COLLECTION_ANIMALS.findIndex((_, i) => !state.unlockedAnimals.includes(i));
+            if (nextAnimal !== -1) {
+                state.unlockedAnimals.push(nextAnimal);
+                state.starsSinceLastAnimal = 0;
+                state.starsToNextAnimal = Math.min(state.starsToNextAnimal + 2, 20);
+                setTimeout(() => {
+                    const slots = els.animalGrid.querySelectorAll(".animal-slot");
+                    if (slots[nextAnimal]) {
+                        slots[nextAnimal].classList.add("unlocked", "just-unlocked");
+                        slots[nextAnimal].classList.remove("locked");
+                    }
+                }, 300);
+            }
+        }
+
+        saveState();
+
+        if (state.completed >= SESSION_GOAL) { showCelebration(); return; }
+
+        showFeedback(pick(CELEBRATIONS) + " ⭐ +1", "success");
+        if (state.streak > 0 && state.streak % 5 === 0) { launchConfetti(30); changeMascot(); }
+        updateUI();
+    }
+
+    function handleMiss() {
+        if (state.completed >= SESSION_GOAL || !state.isStarted) return;
+        state.attempts++;
+        state.streak = 0;
+        showFeedback("Oops! Try again! 💪", "error");
+        updateUI();
+    }
+
+    function showCelebration() {
+        clearAllTargets();
+        state.isStarted = false;
+        els.pauseBtn.disabled = true;
+
+        const acc = state.attempts > 0 ? Math.round((state.successes / (state.successes + state.attempts)) * 100) : 100;
+        els.finalStars.textContent = state.sessionStars + " ⭐";
+        els.finalStreak.textContent = state.bestStreak + " 🔥";
+        els.finalAccuracy.textContent = acc + "%";
+        els.celebrationMsg.textContent = pick(CELEBRATIONS) + " You finished all " + SESSION_GOAL + " exercises!";
+        els.celebrationOverlay.classList.remove("hidden");
+        launchConfetti(120);
+        updateUI();
+    }
+
+    // ============================================
+    // TARGET MANAGEMENT
+    // ============================================
+    function clearAllTargets() {
+        clearTimeout(state.targetTimeout); state.targetTimeout = null;
+        state.activeTargets.forEach(t => { if (t.parentElement) t.remove(); });
+        state.activeTargets = [];
+        els.practiceArea.classList.remove("drag-mode");
+        document.removeEventListener("mousemove", onDrag);
+        document.removeEventListener("mouseup", endDrag);
+        state.isDragging = false; state.dragElement = null;
+        if (state.hoverInterval) { clearInterval(state.hoverInterval); state.hoverInterval = null; }
+        if (state.selectionHandler) {
+            document.removeEventListener("mouseup", state.selectionHandler);
+            state.selectionHandler = null;
+        }
+        try { window.getSelection().removeAllRanges(); } catch(e) {}
+    }
+
+    function getRandomPos(size) {
+        const area = els.practiceArea.getBoundingClientRect();
+        const pad = 20;
+        return {
+            x: Math.max(pad, Math.random() * (area.width - size - pad)),
+            y: Math.max(pad, Math.random() * (area.height - size - pad))
+        };
+    }
+
+    // ============================================
+    // CLICK
+    // ============================================
+    function createClickTarget() {
+        if (state.completed >= SESSION_GOAL || state.isPaused || !state.isStarted) return;
+        clearAllTargets();
+        const size = 80, pos = getRandomPos(size);
+        const t = document.createElement("div");
+        t.className = "animal-target appear " + pick(COLOR_CLASSES);
+        t.style.cssText = `width:${size}px;height:${size}px;left:${pos.x}px;top:${pos.y}px;font-size:${size*0.55}px`;
+        t.textContent = pick(TARGET_ANIMALS);
+        t.addEventListener("click", (e) => {
+            e.stopPropagation(); state.attempts++;
+            t.classList.add("pop"); handleSuccess();
+            setTimeout(createClickTarget, 350);
+        });
+        els.practiceArea.appendChild(t); state.activeTargets.push(t);
+        state.targetTimeout = setTimeout(() => {
+            if (t.parentElement) { t.remove(); handleMiss(); createClickTarget(); }
+        }, 4500);
+    }
+
+    // ============================================
+    // DOUBLE-CLICK
+    // ============================================
+    function createDoubleClickTarget() {
+        if (state.completed >= SESSION_GOAL || state.isPaused || !state.isStarted) return;
+        clearAllTargets();
+        const size = 85, pos = getRandomPos(size);
+        const t = document.createElement("div");
+        t.className = "animal-target appear orange";
+        t.style.cssText = `width:${size}px;height:${size}px;left:${pos.x}px;top:${pos.y}px;font-size:${size*0.55}px`;
+        t.textContent = pick(TARGET_ANIMALS);
+        t.addEventListener("dblclick", (e) => {
+            e.stopPropagation(); state.attempts++;
+            t.classList.add("pop"); handleSuccess();
+            setTimeout(createDoubleClickTarget, 350);
+        });
+        t.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showFeedback("Tap it TWICE, really fast! ✌️", "error", 1200);
+        });
+        els.practiceArea.appendChild(t); state.activeTargets.push(t);
+        state.targetTimeout = setTimeout(() => {
+            if (t.parentElement) { t.remove(); handleMiss(); createDoubleClickTarget(); }
+        }, 6000);
+    }
+
+    // ============================================
+    // RIGHT-CLICK
+    // ============================================
+    function createRightClickTarget() {
+        if (state.completed >= SESSION_GOAL || state.isPaused || !state.isStarted) return;
+        clearAllTargets();
+        const size = 85, pos = getRandomPos(size);
+        const t = document.createElement("div");
+        t.className = "animal-target appear blue";
+        t.style.cssText = `width:${size}px;height:${size}px;left:${pos.x}px;top:${pos.y}px;font-size:${size*0.55}px`;
+        t.textContent = pick(TARGET_ANIMALS);
+        t.addEventListener("contextmenu", (e) => {
+            e.preventDefault(); e.stopPropagation(); state.attempts++;
+            t.classList.add("pop"); handleSuccess();
+            setTimeout(createRightClickTarget, 350);
+        });
+        t.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showFeedback("Use the OTHER button! (Right side) 🖱️", "error", 1500);
+            t.classList.add("shake"); setTimeout(() => t.classList.remove("shake"), 400);
+        });
+        els.practiceArea.appendChild(t); state.activeTargets.push(t);
+        state.targetTimeout = setTimeout(() => {
+            if (t.parentElement) { t.remove(); handleMiss(); createRightClickTarget(); }
+        }, 7000);
+    }
+
+    // ============================================
+    // HOVER
+    // ============================================
+    function createHoverTarget() {
+        if (state.completed >= SESSION_GOAL || state.isPaused || !state.isStarted) return;
+        clearAllTargets();
+        const size = 90, pos = getRandomPos(size + 20);
+        const t = document.createElement("div");
+        t.className = "animal-target appear green";
+        t.style.cssText = `width:${size}px;height:${size}px;left:${pos.x}px;top:${pos.y}px;font-size:${size*0.45}px`;
+        t.innerHTML = '🦋<div class="hover-bar-track"><div class="hover-bar-fill" id="hoverFill"></div></div>';
+        let progress = 0;
+        t.addEventListener("mouseenter", () => {
+            state.attempts++;
+            state.hoverInterval = setInterval(() => {
+                progress += (50 / 1500) * 100;
+                const fill = document.getElementById("hoverFill");
+                if (fill) fill.style.width = Math.min(progress, 100) + "%";
+                if (progress >= 100) {
+                    clearInterval(state.hoverInterval); state.hoverInterval = null;
+                    t.classList.add("pop"); handleSuccess();
+                    setTimeout(createHoverTarget, 350);
+                }
+            }, 50);
+        });
+        t.addEventListener("mouseleave", () => {
+            if (state.hoverInterval) { clearInterval(state.hoverInterval); state.hoverInterval = null; }
+            progress = 0;
+            const fill = document.getElementById("hoverFill");
+            if (fill) fill.style.width = "0%";
+        });
+        t.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showFeedback("Don't click — just hover over it! 🦋", "error", 1200);
+        });
+        els.practiceArea.appendChild(t); state.activeTargets.push(t);
+        state.targetTimeout = setTimeout(() => {
+            if (t.parentElement && !t.classList.contains("pop")) { t.remove(); handleMiss(); createHoverTarget(); }
+        }, 10000);
+    }
+
+    // ============================================
+    // DRAG & DROP
+    // ============================================
+    function createDragExercise() {
+        if (state.completed >= SESSION_GOAL || state.isPaused || !state.isStarted) return;
+        clearAllTargets();
+        els.practiceArea.classList.add("drag-mode");
+        const pair = pick(DRAG_PAIRS);
+        const areaRect = els.practiceArea.getBoundingClientRect();
+
+        const dz = document.createElement("div");
+        dz.className = "drop-home"; dz.id = "dropHome";
+        dz.style.right = "30px"; dz.style.top = (areaRect.height / 2 - 50) + "px";
+        dz.textContent = pair.home;
+        els.practiceArea.appendChild(dz); state.activeTargets.push(dz);
+
+        const da = document.createElement("div");
+        da.className = "drag-animal"; da.id = "dragAnimal";
+        da.style.left = "30px"; da.style.top = (areaRect.height / 2 - 40) + "px";
+        da.textContent = pair.animal;
+        els.practiceArea.appendChild(da); state.activeTargets.push(da);
+        da.addEventListener("mousedown", startDrag);
+    }
+
+    function startDrag(e) {
+        e.preventDefault();
+        const da = document.getElementById("dragAnimal"); if (!da) return;
+        state.isDragging = true; state.dragElement = da;
+        const rect = da.getBoundingClientRect();
+        state.dragOffsetX = e.clientX - rect.left;
+        state.dragOffsetY = e.clientY - rect.top;
+        da.classList.add("dragging");
+        document.addEventListener("mousemove", onDrag);
+        document.addEventListener("mouseup", endDrag);
+    }
+
+    function onDrag(e) {
+        if (!state.isDragging || !state.dragElement) return;
+        const areaRect = els.practiceArea.getBoundingClientRect();
+        let x = Math.max(0, Math.min(e.clientX - areaRect.left - state.dragOffsetX, areaRect.width - 80));
+        let y = Math.max(0, Math.min(e.clientY - areaRect.top - state.dragOffsetY, areaRect.height - 80));
+        state.dragElement.style.left = x + "px"; state.dragElement.style.top = y + "px";
+        const dz = document.getElementById("dropHome");
+        if (dz) dz.classList.toggle("hover", isOverlapping(state.dragElement.getBoundingClientRect(), dz.getBoundingClientRect()));
+    }
+
+    function endDrag() {
+        document.removeEventListener("mousemove", onDrag);
+        document.removeEventListener("mouseup", endDrag);
+        if (!state.isDragging || !state.dragElement) return;
+        const da = state.dragElement, dz = document.getElementById("dropHome");
+        da.classList.remove("dragging"); state.isDragging = false; state.dragElement = null;
+        if (da && dz) {
+            state.attempts++;
+            if (isOverlapping(da.getBoundingClientRect(), dz.getBoundingClientRect())) {
+                dz.classList.add("success"); da.style.display = "none";
+                handleSuccess(); setTimeout(createDragExercise, 600);
+            } else {
+                showFeedback("Drop it on the home! 🏠", "error", 1200);
+                const areaRect = els.practiceArea.getBoundingClientRect();
+                da.style.left = "30px"; da.style.top = (areaRect.height / 2 - 40) + "px";
+            }
+        }
+    }
+
+    function isOverlapping(r1, r2) {
+        return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
+    }
+
+    // ============================================
+    // SCROLL
+    // ============================================
+    function createScrollExercise() {
+        if (state.completed >= SESSION_GOAL || state.isPaused || !state.isStarted) return;
+        clearAllTargets();
+        const box = document.createElement("div"); box.className = "scroll-box"; box.id = "scrollBox";
+        const n = 2 + Math.floor(Math.random() * 3);
+        const hints = ["⬇️ Keep scrolling...","⬇️ Almost there...","⬇️ A little more...","⬇️ Scroll down..."];
+        for (let i = 0; i < n; i++) {
+            const f = document.createElement("div"); f.className = "scroll-filler";
+            f.textContent = hints[i % hints.length]; box.appendChild(f);
+        }
+        const gem = document.createElement("div"); gem.className = "scroll-gem";
+        gem.textContent = "🌟 You found the gem! Click me! 🌟";
+        gem.addEventListener("click", () => {
+            state.attempts++; handleSuccess(); setTimeout(createScrollExercise, 500);
+        });
+        box.appendChild(gem);
+        for (let i = 0; i < 2; i++) {
+            const f = document.createElement("div"); f.className = "scroll-filler";
+            f.textContent = "⬆️ Scroll up for the next one!"; box.appendChild(f);
+        }
+        els.practiceArea.appendChild(box); state.activeTargets.push(box);
+        box.scrollTop = 0;
+    }
+
+    // ============================================
+    // TEXT SELECT (with varied positions)
+    // ============================================
+    function pickSelectEntry() {
+        // Avoid repeating the same sentence within the last 8
+        let idx;
+        let attempts = 0;
+        do {
+            idx = Math.floor(Math.random() * SELECT_BANK.length);
+            attempts++;
+        } while (state.recentSelectIndices.includes(idx) && attempts < 30);
+        state.recentSelectIndices.push(idx);
+        if (state.recentSelectIndices.length > 8) state.recentSelectIndices.shift();
+        return SELECT_BANK[idx];
+    }
+
+    function createSelectExercise() {
+        if (state.completed >= SESSION_GOAL || state.isPaused || !state.isStarted) return;
+        clearAllTargets();
+
+        const entry = pickSelectEntry();
+        const word = entry.word;
+        // Build the sentence HTML with the target word wrapped
+        const regex = new RegExp("(" + word + ")", "i");
+        const parts = entry.sentence.split(regex);
+        let sentenceHTML = "";
+        for (const part of parts) {
+            if (part.toLowerCase() === word.toLowerCase()) {
+                sentenceHTML += '<span class="target-word" id="targetWord">' + part + '</span>';
+            } else {
+                sentenceHTML += part;
+            }
+        }
+
+        const container = document.createElement("div");
+        container.className = "select-container";
+        container.innerHTML = `
+            <h3>✏️ Select the special word!</h3>
+            <div class="selectable-text">${sentenceHTML}</div>
+            <p class="select-hint">💡 Click at the start of the word, hold, drag to the end, let go!</p>
+        `;
+        els.practiceArea.appendChild(container); state.activeTargets.push(container);
+
+        state.selectionHandler = function() {
+            setTimeout(() => {
+                const sel = window.getSelection();
+                const text = sel.toString().trim().toLowerCase();
+                if (text.length === 0) return;
+                state.attempts++;
+                if (text === word.toLowerCase()) {
+                    const tw = document.getElementById("targetWord");
+                    if (tw) tw.classList.add("found");
+                    handleSuccess();
+                    document.removeEventListener("mouseup", state.selectionHandler);
+                    state.selectionHandler = null;
+                    setTimeout(createSelectExercise, 700);
+                } else {
+                    showFeedback("Try to select just: " + word + " ✏️", "error", 1500);
+                    sel.removeAllRanges();
+                }
+            }, 60);
+        };
+        document.addEventListener("mouseup", state.selectionHandler);
+    }
+
+    // ============================================
+    // SKILL SWITCHING
+    // ============================================
+    function switchSkill(skill) {
+        state.currentSkill = skill;
+        els.skillSelector.querySelectorAll(".skill-btn").forEach(b => {
+            b.classList.toggle("active", b.dataset.skill === skill);
+        });
+        els.instructions.innerHTML = INSTRUCTIONS[skill];
+        clearAllTargets();
+        if (!els.celebrationOverlay.classList.contains("hidden")) { resetSession(); return; }
+        if (!state.isStarted) { els.startOverlay.classList.remove("hidden"); els.pauseBtn.disabled = true; return; }
+        if (state.isPaused) return;
+        startCurrentExercise();
+    }
+
+    function startCurrentExercise() {
+        const map = {
+            "click": createClickTarget, "double-click": createDoubleClickTarget,
+            "right-click": createRightClickTarget, "hover": createHoverTarget,
+            "drag": createDragExercise, "scroll": createScrollExercise, "select": createSelectExercise
+        };
+        (map[state.currentSkill] || createClickTarget)();
+    }
+
+    // ============================================
+    // SESSION CONTROLS
+    // ============================================
+    function startSession() {
+        state.isStarted = true; state.isPaused = false;
+        els.startOverlay.classList.add("hidden");
+        els.celebrationOverlay.classList.add("hidden");
+        els.pauseBtn.disabled = false;
+        showFeedback("Go! 🎮", "success", 1000);
+        startCurrentExercise(); updateUI();
+    }
+
+    function pauseSession() {
+        if (!state.isStarted || state.isPaused) return;
+        state.isPaused = true; clearAllTargets();
+        els.pauseOverlay.classList.remove("hidden"); els.pauseBtn.disabled = true;
+    }
+
+    function resumeSession() {
+        if (!state.isPaused) return;
+        state.isPaused = false; els.pauseOverlay.classList.add("hidden");
+        els.pauseBtn.disabled = false;
+        showFeedback("Welcome back! 🎮", "success", 1000);
+        startCurrentExercise();
+    }
+
+    function resetSession() {
+        state.streak = 0; state.bestStreak = 0; state.attempts = 0;
+        state.successes = 0; state.completed = 0; state.sessionStars = 0;
+        state.isStarted = false; state.isPaused = false;
+        state.recentSelectIndices = [];
+        clearAllTargets();
+        els.startOverlay.classList.remove("hidden");
+        els.pauseOverlay.classList.add("hidden");
+        els.celebrationOverlay.classList.add("hidden");
+        els.pauseBtn.disabled = true;
+        showFeedback("Ready to play! 🎮", "");
+        updateUI();
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    els.practiceArea.addEventListener("contextmenu", e => e.preventDefault());
+    els.startBtn.addEventListener("click", startSession);
+    els.resumeBtn.addEventListener("click", resumeSession);
+    els.restartBtn.addEventListener("click", resetSession);
+    els.pauseBtn.addEventListener("click", pauseSession);
+    els.resetBtn.addEventListener("click", resetSession);
+
+    els.skillSelector.querySelectorAll(".skill-btn").forEach(btn => {
+        btn.addEventListener("click", () => switchSkill(btn.dataset.skill));
+    });
+
+    els.practiceArea.addEventListener("click", (e) => {
+        if (e.target === els.practiceArea && state.isStarted &&
+            (state.currentSkill === "click" || state.currentSkill === "double-click")) {
+            handleMiss();
+        }
+    });
+
+    // ============================================
+    // INIT
+    // ============================================
+    loadState();
+    els.progressGoal.textContent = SESSION_GOAL;
+    updateUI();
+    </script>
+</body>
+</html>
